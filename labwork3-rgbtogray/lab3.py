@@ -21,16 +21,17 @@ print(pixels)
 ### RGB to Gray: CPU
 print("===================CPU PROCESSING===================")
 start_cpu = time.time()
-host_output_cpu = []
-for r, g, b in pixels:
+host_output_cpu = np.zeros((pixel_count, 3), dtype=np.uint8)  # Adjust output to store RGB values
+for i, (r, g, b) in enumerate(pixels):
     # Convert RGB values to int to prevent overflow
     r = int(r)
     g = int(g)
     b = int(b)
     # Using the average method for grayscale conversion
-    g_value = (r + g + b) // 3.0
-    host_output_cpu.append(int(g_value))
+    g_value = (r + g + b) // 3
+    host_output_cpu[i] = (g_value, g_value, g_value)  # Set all channels to the grayscale value
 end_cpu = time.time()
+print(host_output_cpu)
 
 
 ### RGB to Gray: GPU
@@ -57,6 +58,7 @@ grayscale_kernel[grid_size, block_size](dev_input, dev_output)
 
 # 4. GPU copy results to CPU
 host_output_gpu = dev_output.copy_to_host()
+print(host_output_gpu)
 
 # Print processing times
 print("===================COMPARISON===================")
@@ -68,16 +70,16 @@ print(f'Speedup: {cpu_time / gpu_time:.2f}x')
 
 # Saving resutls
 print("===================SAVING===================")
+def save_grayscale_image(output_array, output_path, width, height):
+    ## Output from CPU and GPU are all (N,3) matrix, with each row a pixel
+    gray_image = Image.new('RGB', (width, height))
+    gray_image.putdata([tuple(row) for row in output_array])  # Use all channels for grayscale
+    gray_image.save(output_path)
 
-# Result of CPU: matrix 1xN of gray pixel, saved as JPEG 
 cpu_output_path = os.path.splitext(image_path)[0] + '_gray_cpu.jpg'
-gray_image = Image.new('RGB', (image.width, image.height)) 
-gray_image.putdata([(g, g, g) for g in host_output_cpu])  # Repeat gray value for each channel
-gray_image.save(cpu_output_path)
+save_grayscale_image(host_output_cpu, cpu_output_path, image.width, image.height)
 
-# Result of GPU: matrix (Nx3) of gray pixel (each item in a row is equal), saved as JPEG 
 gpu_output_path = os.path.splitext(image_path)[0] + '_gray_gpu.jpg'
-gray_image_gpu = Image.new('RGB', (image.width, image.height)) 
-gray_image_gpu.putdata([(g, g, g) for g in host_output_gpu[:, 0]])  # Use only one channel for grayscale
-gray_image_gpu.save(gpu_output_path)
-print(f"Saving result completed")
+save_grayscale_image(host_output_gpu, gpu_output_path, image.width, image.height)
+
+print(f"Saving results completed")
