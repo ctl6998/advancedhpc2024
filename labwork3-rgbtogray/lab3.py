@@ -37,7 +37,7 @@ print(host_output_cpu)
 ### RGB to Gray: GPU
 print("===================GPU PROCESSING===================")
 ## 1. CPU feeds data to GPU: Allocate memory
-dev_input = cuda.to_device(pixels) #Must be (Nx3) matrix, with N=number of pixel and 3 is channel
+dev_input = cuda.to_device(pixels) #Must be (Nx3) matrix, with N=number of pixel and 3 is channels
 dev_output = cuda.device_array((pixel_count, 3), dtype=np.uint8)  # Adjust output to store RGB values
 
 ## 2. CPU asks GPU to process
