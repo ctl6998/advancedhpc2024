@@ -13,7 +13,7 @@ device = cuda.select_device(device_id)
 print(f"Selected GPU ID: {device.id}")
 print(f"Selected GPU Name: {device.name.decode('utf-8')}")
 
-# Print selected GPU information
+# Print GPU information
 print("===========================")
 print(f"Multiprocessor Count: {device.MULTIPROCESSOR_COUNT}")
 print(f"Core count for compute capability 8.9: {device.MULTIPROCESSOR_COUNT * 128}")
